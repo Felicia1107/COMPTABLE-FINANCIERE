@@ -5,7 +5,6 @@ const getGrandLivre = async () => {
     const response = await apiClient.get(
       `/models/GL_Journal?$filter=GL_Category_ID%20eq%201000000&$expand=GL_JournalLine`
     );
-    // console.log('Réponse API:', response.records);
     return response.records;
   } catch (error) {
     console.error(
@@ -21,7 +20,6 @@ const createJournal = async (data) => {
     const dateIso = data.date.replace(" ", "T");
     const c_p_id = await findPeriodId(dateIso);
 
-    // if (c_p_id !== null && c_p_id !== undefined) {
     const journal = {
       AD_Client_ID: 11,
       AD_Org_ID: 11,
@@ -47,7 +45,6 @@ const createJournal = async (data) => {
     throw new Error(`Échec de la création du journal : ${error.message}`);
   }
 };
-// mamorona journaline
 const createJournalLine = async (data, journal, compte, line) => {
   try {
     const dateIso = data.date.replace(" ", "T");
@@ -72,7 +69,6 @@ const createJournalLine = async (data, journal, compte, line) => {
       "/models/GL_JournalLine",
       journalline
     );
-    // console.log('Journal Line created:', response);
     return response;
   } catch (error) {
     console.error("Erreur lors de la création du journal Line :", {
@@ -91,10 +87,9 @@ const findPeriodId = async (date) => {
     },
   });
 
-  // console.log(response)
 
   if (response.records && response.records.length > 0) {
-    return response.records[0].id; // ou .C_Period_ID selon ta structure
+    return response.records[0].id; 
   }
 
   throw new Error(`Aucune période active ouverte trouvée pour la date ${date}`);
@@ -108,7 +103,7 @@ const journalExist = async (value) => {
     return response.records || [];
   } catch (error) {
     console.error("Erreur lors de la vérification du journal :", error);
-    return []; // retourne toujours un tableau pour éviter les erreurs
+    return []; 
   }
 };
 

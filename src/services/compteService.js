@@ -1,6 +1,5 @@
 import apiClient from "./api";
 
-// fonction mamorona compte vaovao
 const createCompte = async (data) => {
   try {
     if (data.existeDeja !== true) {
@@ -25,7 +24,6 @@ const createCompte = async (data) => {
     throw new Error(`Échec de la création du compte : ${error.message}`);
   }
 };
-// verification compte existante
 const compteExist = async (value) => {
   try {
     const response = await apiClient.get(

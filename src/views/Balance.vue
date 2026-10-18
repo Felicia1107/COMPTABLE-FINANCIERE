@@ -10,7 +10,6 @@ const referenceFilter = ref('');
 const showModal = ref(false);
 const selectedAccount = ref(null);
 
-// Formater les montants en devise (USD)
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -18,7 +17,6 @@ const formatCurrency = (amount) => {
     }).format(amount || 0);
 };
 
-// Formater les dates
 const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
         year: 'numeric',
@@ -27,34 +25,28 @@ const formatDate = (dateString) => {
     });
 };
 
-// Réinitialiser les filtres
 const resetFilters = () => {
     dateMin.value = null;
     dateMax.value = null;
     referenceFilter.value = '';
 };
 
-// Ouvrir la modale
 const openModal = (accountName) => {
     selectedAccount.value = accountName;
     showModal.value = true;
 };
 
-// Fermer la modale
 const closeModal = () => {
     showModal.value = false;
     selectedAccount.value = null;
 };
 
-// Données de la balance
 const balanceData = computed(() => {
     const grouped = {};
 
-    // Filtrer les journaux
     const filteredJournals = grandLivre.value.filter(journal => {
         let matches = true;
 
-        // Filtre par date
         const journalDate = new Date(journal.DateAcct);
         if (dateMin.value) {
             const minDate = new Date(dateMin.value);
@@ -66,7 +58,6 @@ const balanceData = computed(() => {
             matches = matches && journalDate <= maxDate;
         }
 
-        // Filtre par libellé/référence pièce
         if (referenceFilter.value) {
             const refLower = referenceFilter.value.toLowerCase();
             matches =
@@ -78,7 +69,6 @@ const balanceData = computed(() => {
         return matches;
     });
 
-    // Regrouper par compte
     filteredJournals.forEach(journal => {
         (journal.GL_JournalLine || []).forEach(line => {
             const accountName = line.Account_ID?.identifier || 'Compte inconnu';
@@ -93,13 +83,11 @@ const balanceData = computed(() => {
         });
     });
 
-    // Trier les comptes par nom
     return Object.fromEntries(
         Object.entries(grouped).sort(([a], [b]) => a.localeCompare(b))
     );
 });
 
-// Calculer les totaux généraux de la balance
 const balanceTotals = computed(() => {
     let totalDebit = 0;
     let totalCredit = 0;
@@ -115,13 +103,11 @@ const balanceTotals = computed(() => {
     };
 });
 
-// Lignes pour le compte sélectionné dans la modale
 const accountLines = computed(() => {
     if (!selectedAccount.value) return [];
 
     const lines = [];
 
-    // Filtrer les journaux
     const filteredJournals = grandLivre.value.filter(journal => {
         let matches = true;
 
@@ -137,7 +123,6 @@ const accountLines = computed(() => {
             matches = matches && journalDate <= maxDate;
         }
 
-        // Filtre par libellé/référence pièce
         if (referenceFilter.value) {
             const refLower = referenceFilter.value.toLowerCase();
             matches =
@@ -149,7 +134,6 @@ const accountLines = computed(() => {
         return matches;
     });
 
-    // Extraire les lignes pour le compte sélectionné
     filteredJournals.forEach(journal => {
         (journal.GL_JournalLine || []).forEach(line => {
             if (line.Account_ID?.identifier === selectedAccount.value) {
@@ -163,7 +147,6 @@ const accountLines = computed(() => {
         });
     });
 
-    // Trier par date et Line
     return lines.sort((a, b) => {
         const dateA = new Date(a.DateAcct);
         const dateB = new Date(b.DateAcct);
@@ -171,7 +154,6 @@ const accountLines = computed(() => {
     });
 });
 
-// Calculer les soldes courants pour la modale
 const runningBalances = computed(() => {
     let runningBalance = 0;
     return accountLines.value.map(line => {
@@ -180,7 +162,6 @@ const runningBalances = computed(() => {
     });
 });
 
-// Calculer les totaux pour la modale
 const totalDebit = computed(() => {
     return accountLines.value.reduce((sum, line) => sum + (line.AmtAcctDr || 0), 0);
 });

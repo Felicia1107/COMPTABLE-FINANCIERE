@@ -1,15 +1,13 @@
 import apiClient from "./api";
 
-// Comptes de revenus (classe 7) - À adapter selon votre plan comptable
 const REVENUE_ACCOUNTS = {
-  prefix: "7", // Tous les comptes commençant par 7
-  exact: [700000, 700100, 700200], // Comptes spécifiques si nécessaire
+  prefix: "7", 
+  exact: [700000, 700100, 700200], 
 };
 
-// Comptes de charges (classe 6) - À adapter selon votre plan comptable
 const EXPENSE_ACCOUNTS = {
-  prefix: "6", // Tous les comptes commençant par 6
-  exact: [600000, 600100, 600200], // Comptes spécifiques si nécessaire
+  prefix: "6", 
+  exact: [600000, 600100, 600200],
 };
 
 /**
@@ -19,14 +17,13 @@ const EXPENSE_ACCOUNTS = {
  */
 const getFinancialDashboardData = async (year) => {
   try {
-    // 1. Récupération des données brutes
+  
     const response = await apiClient.get(
       `/models/GL_Journal?$filter=GL_Category_ID eq 1000000&$expand=GL_JournalLine`
     );
 
     const journals = response.records || [];
 
-    // 2. Initialisation des données mensuelles
     const monthsData = Array(12)
       .fill()
       .map((_, index) => ({
@@ -36,7 +33,6 @@ const getFinancialDashboardData = async (year) => {
         netResult: 0,
       }));
 
-    // 3. Traitement des données
     journals.forEach((journal) => {
       const journalDate = new Date(journal.DateAcct);
       if (journalDate.getFullYear() !== year) return;
@@ -46,7 +42,6 @@ const getFinancialDashboardData = async (year) => {
       (journal.GL_JournalLine || []).forEach((line) => {
         const accountId = line.Account_ID.identifier.toString();
 
-        // Classification des comptes
         if (isRevenueAccount(accountId)) {
           monthsData[monthIndex].revenue +=
             (line.AmtSourceCr || 0) - (line.AmtSourceDr || 0);
@@ -57,7 +52,6 @@ const getFinancialDashboardData = async (year) => {
       });
     });
 
-    // 4. Calcul des résultats nets
     monthsData.forEach((month) => {
       month.netResult = month.revenue - month.expenses;
     });
@@ -73,7 +67,6 @@ const getFinancialDashboardData = async (year) => {
   }
 };
 
-// Helpers pour la classification des comptes
 function isRevenueAccount(accountId) {
   const isRev =
     accountId.startsWith(REVENUE_ACCOUNTS.prefix) ||
